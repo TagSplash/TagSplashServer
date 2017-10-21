@@ -1,5 +1,7 @@
 var TwitterStream = require('twitter-stream-api'),
-fs = require('fs');
+fs                = require('fs'),
+express           = require('express');
+var bodyParser    = require('body-parser');
 
 var keys = {
 consumer_key : "gwQPYqh2LxJZ1HJMwRe5ttUYA",
@@ -10,7 +12,7 @@ token_secret : "MJcDD9ffMz7T966sFsyad9YF7kowESoyMyf9zV8AIrzb2"
 
 var Twitter = new TwitterStream(keys, false);
 Twitter.stream('statuses/filter', {
-track: '#thisisathingnow'
+track: 'programming'
 });
 
 var parseLatestText = function() {
@@ -22,12 +24,18 @@ var parseLatestText = function() {
         if (dataarr.length > 1) {
             dataarr[dataarr.length - 1] = "{" + dataarr[dataarr.length - 1];
         }
+        
         var obj = JSON.parse(dataarr[dataarr.length - 1]);
+
         console.log(obj.text);
+        fs.truncate('tweet.txt', 0, function(){});
+        fs.writeFile('tweet.txt', obj.text, (err) => {
+            if (err) throw err;
+        });
     });
 }
 
-fs.truncate('tweets.json', 0, function(){console.log('done')})
+fs.truncate('tweets.json', 0, function(){console.log('cleared tweet logs')});
 
 Twitter.on('connection success', function (uri) {
     console.log('connection success', uri);
